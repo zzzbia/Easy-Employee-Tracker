@@ -1,0 +1,28 @@
+{
+	"dependencies": {
+		"console.table": "^0.10.0",
+		"inquirer": "^8.2.4",
+		"mysql2": "^2.2.5"
+	},
+	"scripts": {
+		"start": "node index"
+	},
+	"name": "employee-tracker",
+	"description": "",
+	"version": "1.0.0",
+	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/zzzbia/Easy-Employee-Tracker.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/zzzbia/Easy-Employee-Tracker/issues"
+	},
+	"homepage": "https://github.com/zzzbia/Easy-Employee-Tracker#readme",
+	"devDependencies": {
+		"nodemon": "^2.0.16"
+	}
+}
