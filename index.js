@@ -1,7 +1,6 @@
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const consoleTable = require("console.table");
-const { createDepartment } = require("./scripts/departments");
 
 const db = mysql.createConnection(
 	{
@@ -89,11 +88,15 @@ const promptQuestions = () => {
 					connection.end();
 					break;
 			}
+		})
+		.catch((err) => {
+			console.log(err);
 		});
 };
 function viewEmployees() {
 	let query =
 		"SELECT emp_no AS 'Employee ID', first_name AS 'First Name', last_name AS 'Last Name' FROM employees Limit 100";
+	// let query = "SELECT * FROM employees";
 
 	db.query(query, (err, res) => {
 		if (err) throw err;
@@ -105,13 +108,32 @@ function viewEmployees() {
 }
 
 function viewDepartments() {
-	db.query("SELECT * FROM department", (err, res) => {});
+	let query = "SELECT dept_no AS ID, dept_name AS DEPARTMENTS FROM departments";
+	// let query = "SELECT * FROM departments";
+
+	db.query(query, (err, res) => {
+		if (err) throw err;
+		console.table(res);
+
+		promptQuestions();
+	});
 }
 
+function createDepartment() {}
+
+function addEmployee() {}
+
+function addRole() {}
+
+function updateEmployeeRole(employeeId, role) {}
+
+// View all the employee roles (or as listed in the db, title)
 function viewRoles() {
 	// let query = "SELECT * FROM titles GROUP BY Title";
-	let query =
-		"SELECT emp_no AS 'Employee ID', title AS 'Roles' FROM titles GROUP BY title";
+	//Selecting the employee number assigning it as Employee ID, title assigning it as Roles and grouping it by title
+	// let query =
+	// 	"SELECT emp_no AS 'Employee ID', title AS 'Roles' FROM titles GROUP BY title";
+	let query = "SELECT * FROM titles";
 	db.query(query, (err, res) => {
 		if (err) throw err;
 		console.table(res);
