@@ -153,9 +153,74 @@ function createDepartment() {
 }
 
 function addEmployee() {
+	//Prompting to enter the first name, last name, role id and manager id
 	let query =
 		"INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
 	let params = [];
+
+	inquirer
+		.prompt([
+			{
+				type: "input",
+				name: "first_name",
+				message: "What is the employee's first name?",
+			},
+			{
+				type: "input",
+				name: "last_name",
+				message: "What is the employee's last name?",
+			},
+		])
+		.then((res) => {
+			params.push(res.first_name, res.last_name);
+			db.query("SELECT * FROM role", (err, res) => {
+				if (err) console.log(err);
+				// console.log(res);
+				inquirer
+					.prompt([
+						{
+							type: "list",
+							name: "role_id",
+							message: "What is the role of the new employee?",
+							choices: res.map((role) => {
+								return {
+									name: role.title,
+									value: role.id,
+								};
+							}),
+						},
+					])
+					.then((res) => {
+						params.push(res.role_id);
+						db.query("SELECT * FROM employee", (err, res) => {
+							if (err) console.log(err);
+							console.log(res);
+							inquirer
+								.prompt([
+									{
+										type: "list",
+										name: "manager_id",
+										message: "Who is the employee's manager?",
+										choices: res.map((manager) => {
+											return {
+												name: manager.first_name + " " + manager.last_name,
+												value: manager.id,
+											};
+										}),
+									},
+								])
+								.then((res) => {
+									params.push(res.manager_id);
+									db.query(query, params, (err, res) => {
+										if (err) console.log(err);
+										console.log("Employee added");
+										promptQuestions();
+									});
+								});
+						});
+					});
+			});
+		});
 }
 
 function addRole() {}
