@@ -93,8 +93,9 @@ const promptQuestions = () => {
 		});
 };
 // View all the departments (the department id and the name)
+//Sorting the departments by department id in ascending order
 function viewDepartments() {
-	let query = "SELECT * FROM department";
+	let query = "SELECT * FROM department ORDER BY id ASC";
 
 	db.query(query, (err, res) => {
 		console.table(res);
@@ -102,9 +103,10 @@ function viewDepartments() {
 		promptQuestions();
 	});
 }
-
+// View all the employees (as listed in the db, first name, last name, title, department, Salary and their manager)
 function viewEmployees() {
-	let query = "SELECT * FROM employee";
+	let query =
+		"SELECT employee.id AS Id, employee.first_name AS 'First Name', employee.last_name AS 'Last Name', role.title AS Title, department.name AS Department, role.salary AS Salary, CONCAT(manager.first_name, ' ', manager.last_name) AS Manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department on role.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id";
 
 	db.query(query, (err, res) => {
 		console.table(res);
@@ -113,14 +115,11 @@ function viewEmployees() {
 	});
 }
 
-// View all the employee roles (or as listed in the db, title)
+// View all the employee roles function (ID, Title, Salary, Department)
 function viewRoles() {
-	// let query = "SELECT * FROM titles GROUP BY Title";
-	//Selecting the employee number assigning it as Employee ID, title assigning it as Roles and grouping it by title
-	// let query =
-	// 	"SELECT emp_no AS 'Employee ID', title AS 'Roles' FROM titles GROUP BY title";
+	//Selecting the employee number assigning it as Employee ID, title, Salary, Department Name from Roles and joining with the Deparment Table ID to get the Department Name
 	let query =
-		"SELECT role.id, role.title, role.salary, department.name AS 'Department Name' FROM role LEFT JOIN department ON role.department_id = department.id";
+		"SELECT role.id AS Id, role.title AS Title, role.salary AS Salary, department.name AS 'Department Name' FROM role LEFT JOIN department ON role.department_id = department.id";
 
 	db.query(query, (err, res) => {
 		if (err) console.log(err);
@@ -129,7 +128,7 @@ function viewRoles() {
 		promptQuestions();
 	});
 }
-
+// Adding a Department and asking for the name of the department
 function createDepartment() {
 	let query = "INSERT INTO department (name) VALUES (?)";
 	let params = [];
@@ -151,9 +150,8 @@ function createDepartment() {
 			});
 		});
 }
-
+// Adding an Employee and asking for the name of the employee, the role id, and the manager id
 function addEmployee() {
-	//Prompting to enter the first name, last name, role id and manager id
 	let query =
 		"INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
 	let params = [];
@@ -222,7 +220,7 @@ function addEmployee() {
 			});
 		});
 }
-
+// Adding a Role and asking for the title, salary, and department id
 function addRole() {
 	let query =
 		"INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
@@ -269,6 +267,40 @@ function addRole() {
 					}
 				);
 			});
+	});
+}
+function updateEmployeeRole() {
+	let query = "UPDATE employee SET role_id = ? WHERE id = ?";
+	let params = [];
+
+	db.query("SELECT * FROM employee", (err, res) => {
+		if (err) console.log(err);
+		console.log(res);
+
+		inquirer.prompt([
+			{
+				type: "list",
+				name: "employee_id",
+				message: "Which employee's role would you like to update?",
+				choices: res.map((employee) => {
+					return {
+						name: employee.first_name + " " + employee.last_name,
+						value: employee.id,
+					};
+				}),
+			},
+			{
+				type: "list",
+				name: "role_id",
+				message: "What is the new role of the employee?",
+				choices: res.map((role) => {
+					return {
+						name: role.title,
+						value: role.id,
+					};
+				}),
+			},
+		]);
 	});
 }
 
