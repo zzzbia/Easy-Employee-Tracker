@@ -223,7 +223,54 @@ function addEmployee() {
 		});
 }
 
-function addRole() {}
+function addRole() {
+	let query =
+		"INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+
+	db.query("SELECT * FROM department", (err, res) => {
+		if (err) console.log(err);
+		console.log(res);
+		inquirer
+			.prompt([
+				{
+					type: "input",
+					name: "title",
+					message: "What is the name of the new role?",
+				},
+				{
+					type: "input",
+					name: "salary",
+					messsage: "What is the salary of the role?",
+				},
+				{
+					type: "list",
+					name: "department_id",
+					message: "What is the department of the role?",
+					choices: res.map((department) => {
+						return {
+							name: department.name,
+							value: department.id,
+						};
+					}),
+				},
+			])
+			.then((res) => {
+				console.log(res);
+				db.query(
+					query,
+					[res.title, res.salary, res.department_id],
+					(err, res) => {
+						if (err) {
+							console.log(err);
+							return;
+						}
+						console.log("Role added");
+						promptQuestions();
+					}
+				);
+			});
+	});
+}
 
 promptQuestions();
 
