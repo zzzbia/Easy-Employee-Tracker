@@ -192,7 +192,7 @@ function addEmployee() {
 						params.push(res.role_id);
 						db.query("SELECT * FROM employee", (err, res) => {
 							if (err) console.log(err);
-							console.log(res);
+							// console.log(res);
 							inquirer
 								.prompt([
 									{
@@ -220,14 +220,14 @@ function addEmployee() {
 			});
 		});
 }
-// Adding a Role and asking for the title, salary, and department id
+//Adding a Role and asking for the title, salary, and department id of the role
 function addRole() {
 	let query =
 		"INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
 
 	db.query("SELECT * FROM department", (err, res) => {
 		if (err) console.log(err);
-		console.log(res);
+		// console.log(res);
 		inquirer
 			.prompt([
 				{
@@ -269,38 +269,58 @@ function addRole() {
 			});
 	});
 }
+// Updating an Employee's role by the role id and the employee id
 function updateEmployeeRole() {
 	let query = "UPDATE employee SET role_id = ? WHERE id = ?";
-	let params = [];
+	let employeeId;
 
 	db.query("SELECT * FROM employee", (err, res) => {
 		if (err) console.log(err);
-		console.log(res);
-
-		inquirer.prompt([
-			{
-				type: "list",
-				name: "employee_id",
-				message: "Which employee's role would you like to update?",
-				choices: res.map((employee) => {
-					return {
-						name: employee.first_name + " " + employee.last_name,
-						value: employee.id,
-					};
-				}),
-			},
-			{
-				type: "list",
-				name: "role_id",
-				message: "What is the new role of the employee?",
-				choices: res.map((role) => {
-					return {
-						name: role.title,
-						value: role.id,
-					};
-				}),
-			},
-		]);
+		// console.log(res);
+		inquirer
+			.prompt([
+				{
+					type: "list",
+					name: "employee_id",
+					message: "Which employee's role do you want to update?",
+					choices: res.map((employee) => {
+						return {
+							name: employee.first_name + " " + employee.last_name,
+							value: employee.id,
+						};
+					}),
+				},
+			])
+			.then((res) => {
+				employeeId = res.employee_id;
+			})
+			.then(() => {
+				db.query("SELECT * FROM role", (err, res) => {
+					if (err) console.log(err);
+					// console.log(res);
+					inquirer
+						.prompt([
+							{
+								type: "list",
+								name: "role_id",
+								message: "Which role do you want to assign to the employee?",
+								choices: res.map((role) => {
+									return {
+										name: role.title,
+										value: role.id,
+									};
+								}),
+							},
+						])
+						.then((res) => {
+							db.query(query, [res.role_id, employeeId], (err, res) => {
+								if (err) console.log(err);
+								console.log("Employee role updated");
+								promptQuestions();
+							});
+						});
+				});
+			});
 	});
 }
 
