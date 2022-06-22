@@ -7,14 +7,13 @@ const db = mysql.createConnection(
 		host: "127.0.0.150",
 		user: "root",
 		password: "12345",
-		database: "employees",
+		database: "employees_db",
 	},
-	console.log("Connected to database")
+	console.log("Connected to Employees_db database")
 );
 
 db.connect((e) => {
-	if (e) throw e;
-	console.log("connected to the employee database");
+	console.log("Welcome!");
 });
 
 const promptQuestions = () => {
@@ -85,7 +84,7 @@ const promptQuestions = () => {
 					updateEmployeeRole();
 					break;
 				case "EXIT":
-					connection.end();
+					quit();
 					break;
 			}
 		})
@@ -93,39 +92,26 @@ const promptQuestions = () => {
 			console.log(err);
 		});
 };
-function viewEmployees() {
-	let query =
-		"SELECT emp_no AS 'Employee ID', first_name AS 'First Name', last_name AS 'Last Name' FROM employees Limit 100";
-	// let query = "SELECT * FROM employees";
-
-	db.query(query, (err, res) => {
-		if (err) throw err;
-
-		console.table(res);
-
-		promptQuestions();
-	});
-}
-
+// View all the departments (the department id and the name)
 function viewDepartments() {
-	let query = "SELECT dept_no AS ID, dept_name AS DEPARTMENTS FROM departments";
-	// let query = "SELECT * FROM departments";
+	let query = "SELECT * FROM department";
 
 	db.query(query, (err, res) => {
-		if (err) throw err;
 		console.table(res);
 
 		promptQuestions();
 	});
 }
 
-function createDepartment() {}
+function viewEmployees() {
+	let query = "SELECT * FROM employee";
 
-function addEmployee() {}
+	db.query(query, (err, res) => {
+		console.table(res);
 
-function addRole() {}
-
-function updateEmployeeRole(employeeId, role) {}
+		promptQuestions();
+	});
+}
 
 // View all the employee roles (or as listed in the db, title)
 function viewRoles() {
@@ -133,13 +119,49 @@ function viewRoles() {
 	//Selecting the employee number assigning it as Employee ID, title assigning it as Roles and grouping it by title
 	// let query =
 	// 	"SELECT emp_no AS 'Employee ID', title AS 'Roles' FROM titles GROUP BY title";
-	let query = "SELECT * FROM titles";
+	let query =
+		"SELECT role.id, role.title, role.salary, department.name AS 'Department Name' FROM role LEFT JOIN department ON role.department_id = department.id";
+
 	db.query(query, (err, res) => {
-		if (err) throw err;
+		if (err) console.log(err);
 		console.table(res);
 
 		promptQuestions();
 	});
 }
 
+function createDepartment() {
+	let query = "INSERT INTO department (name) VALUES (?)";
+	let params = [];
+	inquirer
+		.prompt([
+			{
+				type: "input",
+				name: "dept_name",
+				message: "What is the name of the new department?",
+			},
+		])
+		.then((res) => {
+			params.push(res.dept_name);
+			// console.log(params);
+			db.query(query, params, (err, res) => {
+				if (err) console.log(err);
+				console.log("Department added");
+				promptQuestions();
+			});
+		});
+}
+
+function addEmployee() {
+	let query =
+		"INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+	let params = [];
+}
+
+function addRole() {}
+
 promptQuestions();
+
+function quit() {
+	process.exit();
+}
